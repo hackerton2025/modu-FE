@@ -86,14 +86,23 @@ chrome.action.onClicked.addListener((tab: any) => {
 // 단축키 명령 리스너
 chrome.commands.onCommand.addListener((command: string) => {
   if (command === 'read-page') {
-    // 현재 활성 탭에 메시지 전송
+    // 사용자 제스처 컨텍스트를 유지하기 위해 동기적으로 처리
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs: any[]) => {
-      if (tabs[0]?.id) {
-        chrome.tabs.sendMessage(tabs[0].id, { type: 'CAPTURE_HTML' });
+      if (tabs[0]?.id && tabs[0]?.windowId) {
+        // 1. 사이드패널 열기 (사용자 제스처 컨텍스트 내에서)
+        chrome.sidePanel.open({ windowId: tabs[0].windowId });
+
+        // 2. 사이드패널이 로드될 시간을 주고 HTML 캡처
+        setTimeout(() => {
+          chrome.tabs.sendMessage(tabs[0].id, { type: 'CAPTURE_HTML' });
+        }, 300);
       }
     });
   }
 });
+
+// Webpack DefinePlugin으로 주입될 API 키
+declare const __OPENAI_API_KEY__: string;
 
 // HTML 분석 메시지 리스너
 chrome.runtime.onMessage.addListener((request: any, sender: any, sendResponse: any) => {
@@ -101,8 +110,8 @@ chrome.runtime.onMessage.addListener((request: any, sender: any, sendResponse: a
     // 비동기 처리
     (async () => {
       try {
-        // API 키는 빌드 시점에 주입
-        const apiKey = '__OPENAI_API_KEY_PLACEHOLDER__';
+        // API 키는 webpack 빌드 시점에 주입됨
+        const apiKey = __OPENAI_API_KEY__;
         const analyzer = createHtmlAnalyzer({ apiKey });
         const result = await analyzer.analyzeHtml(request.html);
         sendResponse({ success: true, result });

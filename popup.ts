@@ -1,4 +1,3 @@
-// TypeScript 모듈로 만들기
 export {};
 
 // Web Speech API 타입 선언
@@ -9,6 +8,9 @@ declare global {
   }
 }
 
+// Chrome Extension API 타입 선언
+declare const chrome: any;
+
 // Web Speech API 사용을 위한 변수
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -18,6 +20,7 @@ const speakButton = document.getElementById('speakButton') as HTMLButtonElement;
 const statusDiv = document.getElementById('status') as HTMLDivElement;
 const transcriptDiv = document.getElementById('transcript') as HTMLDivElement;
 const errorDiv = document.getElementById('error') as HTMLDivElement;
+const htmlCodeDiv = document.getElementById('htmlCode') as HTMLDivElement;
 
 let recognition: any = null;
 let isListening: boolean = false;
@@ -236,6 +239,55 @@ micButton.addEventListener('click', () => {
 
 // 텍스트 읽기 버튼 클릭 이벤트
 speakButton.addEventListener('click', speakText);
+
+// HTML 코드 표시 함수
+function displayHTML(html: string) {
+  // HTML을 보기 좋게 포맷팅
+  const formatted = formatHTML(html);
+  htmlCodeDiv.textContent = formatted;
+}
+
+// HTML 포맷팅 함수 (간단한 들여쓰기)
+function formatHTML(html: string): string {
+  // 너무 긴 HTML은 잘라내기 (처음 5000자만)
+  if (html.length > 5000) {
+    html = html.substring(0, 5000) + '\n...(생략)...';
+  }
+  return html;
+}
+
+// Content Script로부터 HTML 받기 (단축키 눌렀을 때)
+chrome.runtime.onMessage.addListener((request: any) => {
+  if (request.type === 'HTML_CAPTURED') {
+    displayHTML(request.html);
+  }
+});
+
+// 현재 탭의 HTML 가져오기
+async function getCurrentTabHTML() {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+    if (!tab.id) {
+      htmlCodeDiv.textContent = '탭 정보를 가져올 수 없습니다.';
+      return;
+    }
+
+    // Content Script에 HTML 요청
+    chrome.tabs.sendMessage(tab.id, { type: 'GET_HTML' }, (response: any) => {
+      if (chrome.runtime.lastError) {
+        htmlCodeDiv.textContent = '페이지 로드 중이거나 접근할 수 없는 페이지입니다.\n확장 프로그램을 다시 로드하거나 페이지를 새로고침해주세요.';
+        return;
+      }
+
+      if (response && response.html) {
+        displayHTML(response.html);
+      }
+    });
+  } catch (error) {
+    htmlCodeDiv.textContent = `오류: ${error}`;
+  }
+}
 
 // 초기화
 initRecognition();

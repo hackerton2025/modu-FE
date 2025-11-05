@@ -69,6 +69,25 @@
       margin-top: 10px;
       font-size: 14px;
     }
+    h2 {
+      font-size: 16px;
+      margin: 20px 0 10px 0;
+      border-top: 1px solid #ddd;
+      padding-top: 15px;
+    }
+    #htmlCode {
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f5f5f5;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
@@ -78,6 +97,9 @@
   <div id="error"></div>
   <button id="micButton">마이크 시작</button>
   <button id="speakButton">텍스트 읽기</button>
+
+  <h2>현재 페이지 HTML</h2>
+  <div id="htmlCode">Command+Shift+L (Mac) 또는 Ctrl+Shift+L (Windows)을 눌러 페이지를 캡처하세요.</div>
 
   <script src="dist/popup.js" type="module"></script>
 </body>

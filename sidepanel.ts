@@ -21,6 +21,7 @@ const statusDiv = document.getElementById('status') as HTMLDivElement;
 const transcriptDiv = document.getElementById('transcript') as HTMLDivElement;
 const errorDiv = document.getElementById('error') as HTMLDivElement;
 const htmlCodeDiv = document.getElementById('htmlCode') as HTMLDivElement;
+const analysisResultDiv = document.getElementById('analysisResult') as HTMLDivElement;
 
 let recognition: any = null;
 let isListening: boolean = false;
@@ -240,11 +241,40 @@ micButton.addEventListener('click', () => {
 // 텍스트 읽기 버튼 클릭 이벤트
 speakButton.addEventListener('click', speakText);
 
+// HTML 분석 함수
+async function analyzeHTML(html: string) {
+  // 로딩 상태 표시
+  analysisResultDiv.className = 'loading';
+  analysisResultDiv.textContent = 'AI가 페이지를 분석하는 중입니다... (최대 10초 소요)';
+
+  try {
+    // Background에 분석 요청
+    const response = await chrome.runtime.sendMessage({
+      type: 'ANALYZE_HTML',
+      html: html
+    });
+
+    if (response.success) {
+      analysisResultDiv.className = '';
+      analysisResultDiv.textContent = response.result;
+    } else {
+      analysisResultDiv.className = 'error';
+      analysisResultDiv.textContent = `분석 실패: ${response.error || '알 수 없는 오류'}`;
+    }
+  } catch (error: any) {
+    analysisResultDiv.className = 'error';
+    analysisResultDiv.textContent = `오류 발생: ${error.message || String(error)}`;
+  }
+}
+
 // HTML 코드 표시 함수
-function displayHTML(html: string) {
+async function displayHTML(html: string) {
   // HTML을 보기 좋게 포맷팅
   const formatted = formatHTML(html);
   htmlCodeDiv.textContent = formatted;
+
+  // HTML 분석 시작
+  await analyzeHTML(html);
 }
 
 // HTML 포맷팅 함수 (간단한 들여쓰기)

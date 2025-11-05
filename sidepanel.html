@@ -78,8 +78,31 @@
       border-top: 1px solid #ddd;
       padding-top: 15px;
     }
-    #htmlCode {
+    #analysisResult {
+      min-height: 80px;
       max-height: 300px;
+      overflow-y: auto;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f0f8ff;
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      line-height: 1.6;
+      color: #333;
+    }
+    #analysisResult.loading {
+      background-color: #fff9e6;
+      color: #666;
+      font-style: italic;
+    }
+    #analysisResult.error {
+      background-color: #ffe6e6;
+      color: #d32f2f;
+    }
+    #htmlCode {
+      max-height: 200px;
       overflow-y: auto;
       padding: 10px;
       border: 1px solid #ddd;
@@ -101,8 +124,11 @@
   <button id="micButton">마이크 시작</button>
   <button id="speakButton">텍스트 읽기</button>
 
+  <h2>AI 페이지 분석 결과</h2>
+  <div id="analysisResult">Command+Shift+L (Mac) 또는 Ctrl+Shift+L (Windows)을 눌러 페이지를 분석하세요.</div>
+
   <h2>현재 페이지 HTML</h2>
-  <div id="htmlCode">Command+Shift+L (Mac) 또는 Ctrl+Shift+L (Windows)을 눌러 페이지를 캡처하세요.</div>
+  <div id="htmlCode">캡처된 HTML이 여기에 표시됩니다.</div>
 
   <script src="dist/sidepanel.js" type="module"></script>
 </body>

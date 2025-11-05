@@ -14,6 +14,11 @@
     "scripting",
     "sidePanel"
   ],
+
+  "icons": {
+    
+  },
+
   "content_scripts": [
     {
       "matches": ["<all_urls>"],

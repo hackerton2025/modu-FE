@@ -1,6 +1,6 @@
 @font-face {
   font-family: "KoddiUDOnGothic";
-  src: url('fonts/KoddiUDOnGothic-Regular.otf') format('opentype');
+  src: url("fonts/KoddiUDOnGothic-Regular.otf") format("opentype");
 }
 
 body {
@@ -33,7 +33,7 @@ body {
   margin: 0;
 }
 
-#answerTitle {
+.answerTitle {
   font-size: 18px;
   font-weight: 700;
   color: #2e60ff;
@@ -75,7 +75,7 @@ body {
   gap: 30px;
 }
 
-#answerContainer {
+.answerContainer {
   width: 100%;
   padding: 10px 16px;
   border: 2px solid #2e60ff;

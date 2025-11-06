@@ -204,25 +204,22 @@ function processCommand(message: string) {
   if (message === "" || message === "여기에 인식된 텍스트가 표시됩니다...")
     return;
 
-  const reqDiv = document.createElement("div");
-  reqDiv.className = "answerContainer";
-  reqDiv.innerHTML = `
+  const reqElement = document.createElement("article");
+  reqElement.className = "answerContainer";
+  reqElement.innerHTML = `
+    <h3 class="answerTitle sr-only">인식한 명령어</h3>
     <p class="descript">${message}</p>
   `;
-  listContainer.appendChild(reqDiv);
+  listContainer.appendChild(reqElement);
 
-  const resDiv = document.createElement("div");
-  resDiv.className = "answerContainer";
-  resDiv.innerHTML = `
-      <p class="title">처리 중 입니다...</p>
-    `;
+  const resDiv = document.createElement("p");
+  resDiv.className = "title";
+  resDiv.innerHTML = "처리 중 입니다...";
   listContainer.appendChild(resDiv);
 
   // 백엔드에 명령어 전송
   executeCommand(message).then((response) => {
-    resDiv.innerHTML = `
-      <p class="title">${response}</p>
-    `;
+    resDiv.innerHTML = response;
   });
 }
 

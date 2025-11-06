@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "description": "음성 명령을 통해 손쉽게 브라우저 내에서 원하는 작업을 수행하는 서비스입니다.",
   "scripts": {
-    "build": "tsc",
+    "build": "node build.js",
     "watch": "tsc --watch"
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.0.0",
+    "webpack": "^5.102.1",
+    "webpack-cli": "^6.0.1"
   },
   "dependencies": {
     "dotenv": "^17.2.3",

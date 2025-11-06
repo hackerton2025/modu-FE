@@ -11,14 +11,17 @@ body {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  background-color: #ffffff;
+  font-size: 18px;
+  line-height: 1.6;
 }
 
 #header {
   left: 0;
   right: 0;
-  padding: 16px 24px;
-  border-bottom: 1px solid #d9d9d9;
+  padding: 20px 24px;
+  border-bottom: 2px solid #d9d9d9;
+  background-color: #ffffff;
 }
 
 #logo {
@@ -47,68 +50,89 @@ body {
   margin: 0;
 }
 
-#listWrapper {
-  width: 100%;
-  max-width: 600px;
+/* 채팅 컨테이너 */
+#chatContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  gap: 20px;
+  background-color: #f8f9fa;
 }
 
-#listContainer {
-  width: 100%;
+#messageList {
   display: flex;
   flex-direction: column;
-  align-items: end;
-  gap: 10px;
+  gap: 20px;
 }
 
 #mainWrapper {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 30px;
-  overflow-y: scroll;
-  padding: 0px 30px;
-  gap: 30px;
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
 }
 
-.answerContainer {
-  width: 100%;
-  padding: 10px 16px;
-  border: 2px solid #2e60ff;
+/* 메시지 스타일 */
+.message {
+  max-width: 85%;
+  padding: 16px 20px;
   border-radius: 16px;
-  background-color: #fff;
-  box-shadow: 0px 4px 40px 0px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  box-sizing: border-box;
+  word-wrap: break-word;
+  line-height: 1.7;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* 사용자 메시지 (오른쪽) */
+.message.user {
+  align-self: flex-end;
+  background-color: #0043CE;
+  color: #FFFFFF;
+  border-bottom-right-radius: 4px;
+  border: 2px solid #0043CE;
+}
+
+/* AI 응답 (왼쪽) */
+.message.ai {
+  align-self: flex-start;
+  background-color: #FFFFFF;
+  color: #000000;
+  border: 2px solid #000000;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 #micButton {
-  background-color: #2e60ff;
-  color: #fff;
-  border: none;
-  border-radius: 50px;
+  background-color: #0043CE;
+  color: #FFFFFF;
+  border: 3px solid #0043CE;
+  border-radius: 12px;
   cursor: pointer;
-  margin-bottom: 10px;
-  padding: 12px 80px;
+  padding: 18px 32px;
   font-weight: 700;
   font-size: 20px;
-  max-width: 600px;
   width: 100%;
   box-sizing: border-box;
+  transition: all 0.2s ease;
+  min-height: 60px;
 }
 
 #micButton:hover {
-  background-color: #1741ca;
+  background-color: #002A8F;
+  border-color: #002A8F;
+  transform: scale(1.02);
+}
+
+#micButton:focus {
+  outline: 4px solid #FFD700;
+  outline-offset: 4px;
 }
 
 #micButton.listening {
-  background-color: #2e60ff;
+  background-color: #D32F2F;
+  border-color: #D32F2F;
   animation: pulse 1s infinite;
 }
 
@@ -141,18 +165,29 @@ body {
   min-height: 20px;
 }
 
+/* 하단 고정 영역 */
+#bottomSection {
+  padding: 20px 24px 24px;
+  background-color: #FFFFFF;
+  border-top: 3px solid #d9d9d9;
+}
+
+/* 현재 인식 중인 텍스트 */
 #transcript {
-  width: 100%;
-  max-width: 600px;
-  padding: 10px 16px;
-  border: 2px solid #fff;
-  border-radius: 16px;
-  background-color: #fff;
-  box-shadow: 0px 4px 40px 0px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  box-sizing: border-box;
+  min-height: 48px;
+  margin-bottom: 16px;
+  padding: 14px 18px;
+  background-color: #F0F0F0;
+  border: 2px solid #878787ff;
+  border-radius: 8px;
+  font-size: 18px;
+  color: #000000;
+  font-weight: 500;
+}
+
+#transcriptText {
+  margin: 0;
+  color: #000000;
 }
 
 #hr {

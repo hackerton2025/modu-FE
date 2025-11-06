@@ -18,6 +18,7 @@ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
 const micButton = document.getElementById('micButton') as HTMLButtonElement;
 const transcriptDiv = document.getElementById('transcript') as HTMLDivElement;
 const listContainer = document.getElementById('listContainer') as HTMLDivElement;
+const statusAnnouncer = document.getElementById('statusAnnouncer') as HTMLDivElement;
 
 let recognition: any = null;
 let isListening: boolean = false;
@@ -26,10 +27,22 @@ let isListening: boolean = false;
 const synth = window.speechSynthesis;
 let isSpeaking: boolean = false;
 
+// 스크린 리더에 상태 알림
+function announceToScreenReader(message: string) {
+  if (statusAnnouncer) {
+    statusAnnouncer.textContent = message;
+    // 2초 후 메시지 지우기
+    setTimeout(() => {
+      statusAnnouncer.textContent = '';
+    }, 2000);
+  }
+}
+
 // 음성인식 초기화
 function initRecognition() {
   if (!SpeechRecognition) {
     console.error('이 브라우저는 음성인식을 지원하지 않습니다.');
+    announceToScreenReader('음성인식이 지원되지 않는 브라우저입니다.');
     if (micButton) micButton.disabled = true;
     return null;
   }
@@ -78,8 +91,11 @@ function initRecognition() {
     isListening = true;
     if (micButton) {
       micButton.textContent = '음성인식 중지';
+      micButton.setAttribute('aria-pressed', 'true');
+      micButton.setAttribute('aria-label', '음성인식 중지하기');
       micButton.classList.add('listening');
     }
+    announceToScreenReader('음성인식이 시작되었습니다.');
   };
 
   // 음성인식 종료
@@ -87,8 +103,11 @@ function initRecognition() {
     isListening = false;
     if (micButton) {
       micButton.textContent = '음성인식 시작';
+      micButton.setAttribute('aria-pressed', 'false');
+      micButton.setAttribute('aria-label', '음성인식 시작하기');
       micButton.classList.remove('listening');
     }
+    announceToScreenReader('음성인식이 중지되었습니다.');
   };
 
   // 에러 처리
@@ -97,8 +116,23 @@ function initRecognition() {
     isListening = false;
     if (micButton) {
       micButton.textContent = '음성인식 시작';
+      micButton.setAttribute('aria-pressed', 'false');
       micButton.classList.remove('listening');
     }
+
+    let errorMessage = '음성인식 오류가 발생했습니다.';
+    switch(event.error) {
+      case 'no-speech':
+        errorMessage = '음성이 감지되지 않았습니다.';
+        break;
+      case 'audio-capture':
+        errorMessage = '마이크를 찾을 수 없습니다.';
+        break;
+      case 'not-allowed':
+        errorMessage = '마이크 권한이 거부되었습니다.';
+        break;
+    }
+    announceToScreenReader(errorMessage);
   };
 
   return recognition;
@@ -141,6 +175,7 @@ function speakText(text: string) {
   if (isSpeaking) {
     synth.cancel();
     isSpeaking = false;
+    announceToScreenReader('음성 읽기가 중지되었습니다.');
   }
 
   const utterance = new SpeechSynthesisUtterance(text);
@@ -151,15 +186,18 @@ function speakText(text: string) {
 
   utterance.onstart = () => {
     isSpeaking = true;
+    announceToScreenReader('페이지 내용을 읽고 있습니다.');
   };
 
   utterance.onend = () => {
     isSpeaking = false;
+    announceToScreenReader('페이지 내용 읽기가 완료되었습니다.');
   };
 
   utterance.onerror = (event: any) => {
     isSpeaking = false;
     console.error('음성 출력 오류:', event.error);
+    announceToScreenReader('음성 출력 오류가 발생했습니다.');
   };
 
   synth.speak(utterance);
@@ -167,6 +205,8 @@ function speakText(text: string) {
 
 // HTML 분석 함수
 async function analyzeHTML(summary: string) {
+  announceToScreenReader('페이지를 분석하고 있습니다. 잠시만 기다려주세요.');
+
   try {
     const response = await chrome.runtime.sendMessage({
       type: 'ANALYZE_HTML',
@@ -174,24 +214,35 @@ async function analyzeHTML(summary: string) {
     });
 
     if (response.success) {
-      // 분석 결과를 리스트에 추가
+      // 분석 결과를 리스트에 추가 (answerContainer와 동일한 스타일)
       if (listContainer) {
-        const answerDiv = document.createElement('div');
-        answerDiv.className = 'answer-item';
+        const answerDiv = document.createElement('article');
+        answerDiv.id = 'answerContainer';
+        answerDiv.setAttribute('role', 'article');
+        answerDiv.setAttribute('aria-labelledby', 'answerTitle-' + Date.now());
+        answerDiv.tabIndex = -1; // 프로그래밍 방식으로 포커스 가능
+
+        const titleId = 'answerTitle-' + Date.now();
         answerDiv.innerHTML = `
-          <p class="answer-title">페이지 분석 결과</p>
-          <p class="answer-content">${response.result}</p>
+          <h3 id="${titleId}" class="sr-only">페이지 분석 결과</h3>
+          <p id="descript">${response.result}</p>
         `;
+
         listContainer.appendChild(answerDiv);
+
+        // 새 결과에 포커스 이동 (스크린 리더가 읽음)
+        answerDiv.focus();
       }
 
       // 자동으로 TTS로 읽어주기
       speakText(response.result);
     } else {
       console.error('분석 실패:', response.error);
+      announceToScreenReader('페이지 분석에 실패했습니다.');
     }
   } catch (error: any) {
     console.error('오류 발생:', error);
+    announceToScreenReader('오류가 발생했습니다.');
   }
 }
 
@@ -214,5 +265,15 @@ if (micButton) {
   });
 }
 
+// 키보드 단축키: Escape로 음성 중지
+document.addEventListener('keydown', (event: KeyboardEvent) => {
+  if (event.key === 'Escape' && isSpeaking) {
+    synth.cancel();
+    isSpeaking = false;
+    announceToScreenReader('음성 읽기가 중지되었습니다.');
+  }
+});
+
 // 초기화
 initRecognition();
+announceToScreenReader('Modu 웹 접근성 도우미가 준비되었습니다. Command+Shift+L을 눌러 페이지를 분석하세요.');

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>음성인식</title>
@@ -91,9 +90,22 @@
   </style>
 </head>
 <body>
-  <h1>음성인식</h1>
-  <div id="status"></div>
-  <div id="transcript">여기에 인식된 텍스트가 표시됩니다...</div>
+  <div id="header">
+    <img id="logo" src="/modu-FE/logos/modu.svg" alt="모두 로고"/>
+  </div>
+    <div id="transWrapper">
+      <div id="transContainer">
+        <p id="title">인식한 명령어</p>
+        <div id="hr"></div>
+        <div id="trans">인식한 명령어가 없습니다.</div>
+      </div>
+      <div id="transContainer">
+        <p id="title">처리한 명령어</p>
+        <div id="hr"></div>
+        <div id="trans">처리한 명령어가 없습니다.</div>
+      </div>
+    </div>
+    
   <div id="error"></div>
   <button id="micButton">마이크 시작</button>
   <button id="speakButton">텍스트 읽기</button>

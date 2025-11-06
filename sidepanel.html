@@ -4,132 +4,31 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>음성인식</title>
-  <style>
-    body {
-      width: 100%;
-      height: 100vh;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      box-sizing: border-box;
-    }
-    h1 {
-      font-size: 18px;
-      margin: 0 0 15px 0;
-      text-align: center;
-    }
-    button {
-      width: 100%;
-      padding: 15px;
-      font-size: 16px;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-bottom: 10px;
-    }
-    #micButton {
-      background-color: #4CAF50;
-    }
-    #micButton:hover {
-      background-color: #45a049;
-    }
-    #micButton.listening {
-      background-color: #f44336;
-      animation: pulse 1s infinite;
-    }
-    #speakButton {
-      background-color: #2196F3;
-    }
-    #speakButton:hover {
-      background-color: #0b7dda;
-    }
-    #speakButton.speaking {
-      background-color: #FF9800;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-    #status {
-      text-align: center;
-      color: #666;
-      margin-bottom: 10px;
-      min-height: 20px;
-    }
-    #transcript {
-      min-height: 100px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      background-color: #f9f9f9;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
-    #error {
-      color: #f44336;
-      text-align: center;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    h2 {
-      font-size: 16px;
-      margin: 20px 0 10px 0;
-      border-top: 1px solid #ddd;
-      padding-top: 15px;
-    }
-    #analysisResult {
-      min-height: 80px;
-      max-height: 300px;
-      overflow-y: auto;
-      padding: 15px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      background-color: #f0f8ff;
-      font-size: 14px;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      line-height: 1.6;
-      color: #333;
-    }
-    #analysisResult.loading {
-      background-color: #fff9e6;
-      color: #666;
-      font-style: italic;
-    }
-    #analysisResult.error {
-      background-color: #ffe6e6;
-      color: #d32f2f;
-    }
-    #htmlCode {
-      max-height: 200px;
-      overflow-y: auto;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      background-color: #f5f5f5;
-      font-family: 'Courier New', monospace;
-      font-size: 11px;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      line-height: 1.4;
-    }
-  </style>
+  <link rel="stylesheet" href="sidepanel.css"/>
 </head>
 <body>
-  <h1>음성인식</h1>
-  <div id="status"></div>
-  <div id="transcript">여기에 인식된 텍스트가 표시됩니다...</div>
-  <div id="error"></div>
-  <button id="micButton">마이크 시작</button>
-  <button id="speakButton">텍스트 읽기</button>
-
-  <h2>AI 페이지 분석 결과</h2>
-  <div id="analysisResult">Command+Shift+L (Mac) 또는 Ctrl+Shift+L (Windows)을 눌러 페이지를 분석하세요.</div>
-
-  <h2>현재 페이지 HTML</h2>
-  <div id="htmlCode">캡처된 HTML이 여기에 표시됩니다.</div>
-
+  <div id="header">
+    <img src="logos/modu.svg"/>
+  </div>
+  <div id="mainWrapper">
+    <!-- 명령어 질의 응답 처리한 리스트 부분 -->
+    <div id="listWrapper">
+      <div id="listContainer">
+        <!-- 명령어 인식한 부분 -->
+        <div id="answerContainer">
+          <p id="descript">* 인식한 명령어 부분 입니다.*</p>
+        </div>
+        <!-- 명령어 질의 응답 처리한 부분 -->
+        <p id="title">처리된 명령어 응답 부분 입니다 ⏎</p>
+      </div>
+    </div>
+    <div id="hr"></div>
+    <div id="transcript">
+      <p id="title">인식한 명령어</p>
+      <p id="descript">* 인식한 명령어가 없습니다 *</p>
+    </div>
+    <button id="micButton">음성인식 시작</button>
+  </div>
   <script src="dist/sidepanel.js" type="module"></script>
 </body>
 </html>

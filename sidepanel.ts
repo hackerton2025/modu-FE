@@ -427,6 +427,18 @@ function speakText(text: string) {
 
 // HTML 분석 함수
 async function analyzeHTML(summary: string) {
+  // 음성인식 중이면 페이지 분석 불가
+  if (isListening) {
+    announceToScreenReader('음성인식을 중지한 후 페이지 분석을 시도해주세요.');
+    return;
+  }
+
+  // AI가 처리 중이면 페이지 분석 불가
+  if (isProcessing) {
+    announceToScreenReader('AI가 응답을 처리하는 중입니다. 잠시만 기다려주세요.');
+    return;
+  }
+
   // 처리 시작
   isProcessing = true;
   if (micButton) {

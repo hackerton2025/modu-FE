@@ -12,7 +12,8 @@ declare global {
 declare const chrome: any;
 
 // Web Speech API 사용을 위한 변수
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const SpeechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
 
 // DOM 요소
 const micButton = document.getElementById('micButton') as HTMLButtonElement;
@@ -27,6 +28,31 @@ let silenceTimer: any = null;
 // TTS (Text-to-Speech) 관련
 const synth = window.speechSynthesis;
 let isSpeaking: boolean = false;
+
+// MCP API URL
+const API_URL = "http://localhost:3000/api/execute-command";
+
+async function executeCommand(userCommand: string): Promise<string> {
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ command: userCommand }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.message || "응답을 받았습니다.";
+  } catch (error: any) {
+    console.error("백엔드 호출 오류:", error);
+    return `오류: ${error.message}`;
+  }
+}
 
 // 스크린 리더에 상태 알림
 function announceToScreenReader(message: string) {
@@ -180,6 +206,16 @@ function initRecognition() {
       micButton.classList.remove('listening');
     }
     announceToScreenReader('음성인식이 중지되었습니다.');
+
+    // 마지막 사용자 메시지를 가져와서 MCP 명령어 처리
+    const messages = messageList.querySelectorAll('.message.user');
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      const command = lastMessage.textContent || '';
+      if (command) {
+        processCommand(command);
+      }
+    }
   };
 
   // 에러 처리
@@ -200,7 +236,7 @@ function initRecognition() {
     }
 
     let errorMessage = '음성인식 오류가 발생했습니다.';
-    switch(event.error) {
+    switch (event.error) {
       case 'no-speech':
         errorMessage = '음성이 감지되지 않았습니다.';
         break;
@@ -243,6 +279,34 @@ function startRecognition() {
     } else {
       console.error('음성인식 오류:', error);
     }
+  }
+}
+
+// MCP 명령어 처리 함수
+async function processCommand(message: string) {
+  if (!message || message === '' || message === '여기에 인식된 텍스트가 표시됩니다...') {
+    return;
+  }
+
+  // "처리 중..." 메시지 추가
+  addAIMessage('처리 중입니다...');
+
+  try {
+    // 백엔드에 명령어 전송
+    const response = await executeCommand(message);
+
+    // 마지막 AI 메시지 업데이트 (처리 중 -> 실제 응답)
+    const aiMessages = messageList.querySelectorAll('.message.ai');
+    if (aiMessages.length > 0) {
+      const lastAIMessage = aiMessages[aiMessages.length - 1] as HTMLElement;
+      lastAIMessage.textContent = response;
+
+      // TTS로 응답 읽어주기
+      speakText(response);
+    }
+  } catch (error: any) {
+    console.error('명령어 처리 오류:', error);
+    addAIMessage(`오류가 발생했습니다: ${error.message}`);
   }
 }
 
@@ -289,7 +353,7 @@ async function analyzeHTML(summary: string) {
   try {
     const response = await chrome.runtime.sendMessage({
       type: 'ANALYZE_HTML',
-      html: summary
+      html: summary,
     });
 
     if (response.success) {

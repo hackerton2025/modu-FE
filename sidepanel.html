@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Modu - 시각장애인 웹 접근성 도우미</title>
-  <link rel="stylesheet" href="sidepanel.css"/>
+  <link rel="stylesheet" href="sidepanel.css" />
   <style>
     /* 스크린 리더 전용 텍스트 */
-    .sr-only {
+    #sr-only {
       position: absolute;
       width: 1px;
       height: 1px;
@@ -38,19 +39,15 @@
     }
   </style>
 </head>
+
 <body>
   <header id="header" role="banner">
-    <img src="logos/modu.svg" alt="Modu 로고"/>
+    <img src="logos/modu.svg" alt="Modu 로고" />
   </header>
 
   <main id="mainWrapper" role="main">
     <!-- 상태 알림 영역 (스크린 리더용) -->
-    <div
-      id="statusAnnouncer"
-      role="status"
-      aria-live="polite"
-      aria-atomic="true"
-      class="sr-only">
+    <div id="statusAnnouncer" role="status" aria-live="polite" aria-atomic="true" class="sr-only">
     </div>
 
     <!-- 채팅 메시지 컨테이너 -->
@@ -79,7 +76,7 @@
     </div>
 
     <!-- 단축키 안내 (스크린 리더용) -->
-    <div class="sr-only">
+    <div id="sr-only">
       <h2>키보드 단축키</h2>
       <ul>
         <li>스페이스바: 음성인식 시작 또는 중지</li>
@@ -91,4 +88,5 @@
 
   <script src="dist/sidepanel.js" type="module"></script>
 </body>
+
 </html>

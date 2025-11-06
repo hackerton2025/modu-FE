@@ -1,6 +1,6 @@
 @font-face {
   font-family: "KoddiUDOnGothic";
-  src: url('fonts/KoddiUDOnGothic-Regular.otf') format('opentype');
+  src: url("fonts/KoddiUDOnGothic-Regular.otf") format("opentype");
 }
 
 body {
@@ -29,21 +29,21 @@ body {
   height: 35px;
 }
 
-#title {
+.title {
   font-size: 18px;
   font-weight: 700;
   color: #000;
   margin: 0;
 }
 
-#answerTitle {
+.answerTitle {
   font-size: 18px;
   font-weight: 700;
-  color: #2E60FF;
+  color: #2e60ff;
   margin: 0;
 }
 
-#descript {
+.descript {
   font-size: 16px;
   font-weight: 700;
   color: #888;
@@ -137,7 +137,7 @@ body {
 }
 
 #speakButton {
-  background-color: #2E60FF;
+  background-color: #2e60ff;
 }
 
 #speakButton:hover {
@@ -145,12 +145,17 @@ body {
 }
 
 #speakButton.speaking {
-  background-color: #FF9800;
+  background-color: #ff9800;
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 #status {
@@ -213,7 +218,7 @@ h2 {
   border: 1px solid #ddd;
   border-radius: 5px;
   background-color: #f5f5f5;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 11px;
   white-space: pre-wrap;
   word-wrap: break-word;

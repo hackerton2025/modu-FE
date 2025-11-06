@@ -47,12 +47,11 @@
 
   <main id="mainWrapper" role="main">
     <!-- 상태 알림 영역 (스크린 리더용) -->
-    <div id="statusAnnouncer" role="status" aria-live="polite" aria-atomic="true" class="sr-only">
+    <div id="statusAnnouncer" role="status" aria-live="polite" aria-atomic="true" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;">
     </div>
 
     <!-- 채팅 메시지 컨테이너 -->
     <section id="chatContainer" aria-labelledby="chatHeading">
-      <h2 id="chatHeading" class="sr-only">대화 내역</h2>
       <div id="messageList" role="log" aria-live="polite" aria-relevant="additions">
         <!-- 메시지들이 여기에 동적으로 추가됩니다 -->
       </div>

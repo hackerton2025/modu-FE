@@ -81,11 +81,11 @@ function addUserMessage(text: string) {
 }
 
 // AI 응답 메시지 추가 함수
-function addAIMessage(text: string) {
+function addAIMessage(text: string, isLoading: boolean = false) {
   if (!messageList || !text) return;
 
   const messageDiv = document.createElement('div');
-  messageDiv.className = 'message ai';
+  messageDiv.className = isLoading ? 'message ai loading' : 'message ai';
   messageDiv.setAttribute('role', 'article');
   messageDiv.setAttribute('aria-label', 'AI 응답');
   messageDiv.textContent = text;
@@ -93,8 +93,10 @@ function addAIMessage(text: string) {
 
   messageList.appendChild(messageDiv);
 
-  // 새 메시지에 포커스 (스크린 리더가 읽음)
-  messageDiv.focus();
+  // 로딩 메시지가 아닐 때만 포커스 (스크린 리더가 읽음)
+  if (!isLoading) {
+    messageDiv.focus();
+  }
   scrollToBottom();
 }
 
@@ -292,8 +294,8 @@ async function processCommand(message: string) {
     return;
   }
 
-  // "처리 중..." 메시지 추가 (TTS 안함)
-  addAIMessage('처리 중입니다...');
+  // "처리 중..." 메시지 추가 (로딩 애니메이션 포함)
+  addAIMessage('처리 중입니다...', true);
 
   try {
     // 백엔드에 명령어 전송
@@ -303,7 +305,11 @@ async function processCommand(message: string) {
     const aiMessages = messageList.querySelectorAll('.message.ai');
     if (aiMessages.length > 0) {
       const lastAIMessage = aiMessages[aiMessages.length - 1] as HTMLElement;
+      // 로딩 클래스 제거
+      lastAIMessage.classList.remove('loading');
       lastAIMessage.textContent = response;
+      // 포커스 이동 (스크린 리더가 읽음)
+      lastAIMessage.focus();
 
       speakText(response);
     }
@@ -315,7 +321,10 @@ async function processCommand(message: string) {
     const aiMessages = messageList.querySelectorAll('.message.ai');
     if (aiMessages.length > 0) {
       const lastAIMessage = aiMessages[aiMessages.length - 1] as HTMLElement;
+      // 로딩 클래스 제거
+      lastAIMessage.classList.remove('loading');
       lastAIMessage.textContent = errorMessage;
+      lastAIMessage.focus();
     } else {
       addAIMessage(errorMessage);
     }
@@ -365,6 +374,9 @@ function speakText(text: string) {
 async function analyzeHTML(summary: string) {
   announceToScreenReader('페이지를 분석하고 있습니다. 잠시만 기다려주세요.');
 
+  // 로딩 메시지 추가
+  addAIMessage('페이지를 분석하고 있습니다...', true);
+
   try {
     const response = await chrome.runtime.sendMessage({
       type: 'ANALYZE_HTML',
@@ -372,20 +384,42 @@ async function analyzeHTML(summary: string) {
     });
 
     if (response.success) {
-      // AI 응답 메시지 추가
-      addAIMessage(response.result);
+      // 마지막 AI 메시지 업데이트 (로딩 -> 실제 응답)
+      const aiMessages = messageList.querySelectorAll('.message.ai');
+      if (aiMessages.length > 0) {
+        const lastAIMessage = aiMessages[aiMessages.length - 1] as HTMLElement;
+        lastAIMessage.classList.remove('loading');
+        lastAIMessage.textContent = response.result;
+        lastAIMessage.focus();
+      }
 
       // 자동으로 TTS로 읽어주기
       speakText(response.result);
     } else {
       console.error('분석 실패:', response.error);
       announceToScreenReader('페이지 분석에 실패했습니다.');
-      addAIMessage('죄송합니다. 페이지 분석에 실패했습니다.');
+
+      // 마지막 AI 메시지 업데이트
+      const aiMessages = messageList.querySelectorAll('.message.ai');
+      if (aiMessages.length > 0) {
+        const lastAIMessage = aiMessages[aiMessages.length - 1] as HTMLElement;
+        lastAIMessage.classList.remove('loading');
+        lastAIMessage.textContent = '죄송합니다. 페이지 분석에 실패했습니다.';
+        lastAIMessage.focus();
+      }
     }
   } catch (error: any) {
     console.error('오류 발생:', error);
     announceToScreenReader('오류가 발생했습니다.');
-    addAIMessage('오류가 발생했습니다. 다시 시도해주세요.');
+
+    // 마지막 AI 메시지 업데이트
+    const aiMessages = messageList.querySelectorAll('.message.ai');
+    if (aiMessages.length > 0) {
+      const lastAIMessage = aiMessages[aiMessages.length - 1] as HTMLElement;
+      lastAIMessage.classList.remove('loading');
+      lastAIMessage.textContent = '오류가 발생했습니다. 다시 시도해주세요.';
+      lastAIMessage.focus();
+    }
   }
 }
 

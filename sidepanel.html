@@ -52,6 +52,16 @@
 
     <!-- 채팅 메시지 컨테이너 -->
     <section id="chatContainer" aria-labelledby="chatHeading">
+      <!-- 초기 안내 메시지 -->
+      <div id="emptyState" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center; padding: 24px;">
+        <img style="width: 100px; height: 100px";" src="./icons/icon_reverse.png" alt="modu 로고">
+        <p style="font-size: 20px; font-weight: 700; color: #333; margin-bottom: 16px;">Modu와 함께 웹을 탐색해보세요</p>
+        <p style="font-size: 18px; color: #666; line-height: 1.8; max-width: 480px;">
+          <strong>Space</strong>를 눌러 음성으로 대화를 시작하거나<br>
+          <strong>Command+Shift+L</strong>을 눌러 현재 페이지 내용을 분석해보세요
+        </p>
+      </div>
+
       <div id="messageList" role="log" aria-live="polite" aria-relevant="additions">
         <!-- 메시지들이 여기에 동적으로 추가됩니다 -->
       </div>

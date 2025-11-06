@@ -72,6 +72,12 @@ function announceToScreenReader(message: string) {
 function addUserMessage(text: string) {
   if (!messageList || !text) return;
 
+  // 첫 메시지일 때 안내 메시지 숨기기
+  const emptyState = document.getElementById('emptyState');
+  if (emptyState) {
+    emptyState.style.display = 'none';
+  }
+
   const messageDiv = document.createElement('div');
   messageDiv.className = 'message user';
   messageDiv.setAttribute('role', 'article');
@@ -86,6 +92,12 @@ function addUserMessage(text: string) {
 // AI 응답 메시지 추가 함수
 function addAIMessage(text: string, isLoading: boolean = false) {
   if (!messageList || !text) return;
+
+  // 첫 메시지일 때 안내 메시지 숨기기
+  const emptyState = document.getElementById('emptyState');
+  if (emptyState) {
+    emptyState.style.display = 'none';
+  }
 
   const messageDiv = document.createElement('div');
   messageDiv.className = isLoading ? 'message ai loading' : 'message ai';

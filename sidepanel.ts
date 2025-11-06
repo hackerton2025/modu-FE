@@ -186,9 +186,9 @@ function initRecognition() {
     silenceTimer = setTimeout(() => {
       if (isListening) {
         recognition.stop();
-        announceToScreenReader('3초 동안 음성이 감지되지 않아 음성인식이 종료되었습니다.');
+        announceToScreenReader('5초 동안 음성이 감지되지 않아 음성인식이 종료되었습니다.');
       }
-    }, 3000);
+    }, 5000);
   };
 
   // 음성인식 종료

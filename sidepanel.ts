@@ -344,9 +344,21 @@ async function processCommand(message: string) {
   // "처리 중..." 메시지 추가 (로딩 애니메이션 포함)
   addAIMessage('처리 중입니다...', true);
 
+  // 3초 후 대기 메시지 TTS 출력
+  const waitingMessageTimer = setTimeout(() => {
+    speakText('응답을 기다리고 있습니다. 잠시만 기다려주세요.');
+  }, 3000);
+
   try {
     // 백엔드에 명령어 전송
     const response = await executeCommand(trimmedMessage);
+
+    // 타이머 취소 및 TTS 중지
+    clearTimeout(waitingMessageTimer);
+    if (isSpeaking) {
+      synth.cancel();
+      isSpeaking = false;
+    }
 
     // 마지막 AI 메시지 업데이트 (처리 중 -> 실제 응답)
     const aiMessages = messageList.querySelectorAll('.message.ai');
@@ -361,6 +373,13 @@ async function processCommand(message: string) {
       speakText(response);
     }
   } catch (error: any) {
+    // 타이머 취소 및 TTS 중지
+    clearTimeout(waitingMessageTimer);
+    if (isSpeaking) {
+      synth.cancel();
+      isSpeaking = false;
+    }
+
     console.error('명령어 처리 오류:', error);
     const errorMessage = `오류가 발생했습니다: ${error.message}`;
 
@@ -452,11 +471,23 @@ async function analyzeHTML(summary: string) {
   // 로딩 메시지 추가
   addAIMessage('페이지를 분석하고 있습니다...', true);
 
+  // 3초 후 대기 메시지 TTS 출력
+  const waitingMessageTimer = setTimeout(() => {
+    speakText('응답을 기다리고 있습니다. 잠시만 기다려주세요.');
+  }, 3000);
+
   try {
     const response = await chrome.runtime.sendMessage({
       type: 'ANALYZE_HTML',
       html: summary,
     });
+
+    // 타이머 취소 및 TTS 중지
+    clearTimeout(waitingMessageTimer);
+    if (isSpeaking) {
+      synth.cancel();
+      isSpeaking = false;
+    }
 
     if (response.success) {
       // 마지막 AI 메시지 업데이트 (로딩 -> 실제 응답)
@@ -484,6 +515,13 @@ async function analyzeHTML(summary: string) {
       }
     }
   } catch (error: any) {
+    // 타이머 취소 및 TTS 중지
+    clearTimeout(waitingMessageTimer);
+    if (isSpeaking) {
+      synth.cancel();
+      isSpeaking = false;
+    }
+
     console.error('오류 발생:', error);
     announceToScreenReader('오류가 발생했습니다.');
 

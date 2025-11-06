@@ -1,34 +1,31 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>음성인식</title>
-  <link rel="stylesheet" href="sidepanel.css"/>
+  <link rel="stylesheet" href="sidepanel.css" />
 </head>
+
 <body>
   <div id="header">
-    <img src="logos/modu.svg"/>
+    <img src="logos/modu.svg" />
   </div>
   <div id="mainWrapper">
     <!-- 명령어 질의 응답 처리한 리스트 부분 -->
     <div id="listWrapper">
       <div id="listContainer">
-        <!-- 명령어 인식한 부분 -->
-        <div id="answerContainer">
-          <p id="descript">* 인식한 명령어 부분 입니다.*</p>
-        </div>
-        <!-- 명령어 질의 응답 처리한 부분 -->
-        <p id="title">처리된 명령어 응답 부분 입니다 ⏎</p>
       </div>
     </div>
     <div id="hr"></div>
     <div id="transcript">
-      <p id="title">인식한 명령어</p>
-      <p id="descript">* 인식한 명령어가 없습니다 *</p>
+      <p class="title">인식한 명령어</p>
+      <p class="descript">* 인식한 명령어가 없습니다 *</p>
     </div>
     <button id="micButton">음성인식 시작</button>
   </div>
   <script src="dist/sidepanel.js" type="module"></script>
 </body>
+
 </html>

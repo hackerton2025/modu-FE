@@ -72,6 +72,12 @@ function announceToScreenReader(message: string) {
 function addUserMessage(text: string) {
   if (!messageList || !text) return;
 
+  // 첫 메시지일 때 안내 메시지 숨기기
+  const emptyState = document.getElementById('emptyState');
+  if (emptyState) {
+    emptyState.style.display = 'none';
+  }
+
   const messageDiv = document.createElement('div');
   messageDiv.className = 'message user';
   messageDiv.setAttribute('role', 'article');
@@ -86,6 +92,12 @@ function addUserMessage(text: string) {
 // AI 응답 메시지 추가 함수
 function addAIMessage(text: string, isLoading: boolean = false) {
   if (!messageList || !text) return;
+
+  // 첫 메시지일 때 안내 메시지 숨기기
+  const emptyState = document.getElementById('emptyState');
+  if (emptyState) {
+    emptyState.style.display = 'none';
+  }
 
   const messageDiv = document.createElement('div');
   messageDiv.className = isLoading ? 'message ai loading' : 'message ai';
@@ -158,7 +170,14 @@ function initRecognition() {
 
     // 인식 중인 텍스트 실시간 표시 (누적된 내용 + 현재 인식 중인 내용)
     if (transcriptText) {
-      transcriptText.textContent = currentSessionTranscript + interimTranscript;
+      const displayText = currentSessionTranscript + interimTranscript;
+      if (displayText) {
+        transcriptText.textContent = displayText;
+        transcriptText.style.color = '#000';
+      } else {
+        transcriptText.textContent = '이곳에 입력될 메시지가 표시됩니다';
+        transcriptText.style.color = '#888';
+      }
     }
 
     // 5초 후 자동 종료 타이머 시작
@@ -212,9 +231,10 @@ function initRecognition() {
     // 누적된 transcript를 사용자 메시지로 추가
     const finalCommand = currentSessionTranscript.trim();
 
-    // transcript 초기화
+    // transcript 초기화 (placeholder로 복원)
     if (transcriptText) {
-      transcriptText.textContent = '';
+      transcriptText.textContent = '이곳에 입력될 메시지가 표시됩니다';
+      transcriptText.style.color = '#888';
     }
 
     // 명령어가 비어있지 않을 때만 처리

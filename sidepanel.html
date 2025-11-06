@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Modu - 시각장애인 웹 접근성 도우미</title>
-  <link rel="stylesheet" href="sidepanel.css"/>
+  <link rel="stylesheet" href="sidepanel.css" />
   <style>
     /* 스크린 리더 전용 텍스트 */
     #sr-only {
@@ -32,35 +33,28 @@
     }
   </style>
 </head>
+
 <body>
   <header id="header" role="banner">
-    <img src="logos/modu.svg" alt="Modu 로고"/>
+    <img src="logos/modu.svg" alt="Modu 로고" />
   </header>
 
   <main id="mainWrapper" role="main">
     <!-- 상태 알림 영역 (스크린 리더용) -->
-    <div
-      id="statusAnnouncer"
-      role="status"
-      aria-live="polite"
-      aria-atomic="true"
-      class="sr-only">
+    <div id="statusAnnouncer" role="status" aria-live="polite" aria-atomic="true" class="sr-only">
     </div>
 
     <!-- 분석 결과 리스트 -->
     <section id="listWrapper" aria-labelledby="resultsHeading">
       <h2 id="resultsHeading" class="sr-only">페이지 분석 결과</h2>
-      <div
-        id="listContainer"
-        role="feed"
-        aria-label="분석 결과 목록">
+      <div id="listContainer" role="feed" aria-label="분석 결과 목록">
         <!-- 명령어 인식한 부분 -->
-        <article id="answerContainer" aria-labelledby="answerTitle">
-          <h3 id="answerTitle" class="sr-only">인식한 명령어</h3>
-          <p id="descript">* 인식한 명령어 부분 입니다.*</p>
+        <article class="answerContainer">
+          <h3 class="answerTitle sr-only">인식한 명령어</h3>
+          <p class="descript">* 인식한 명령어 부분 입니다.*</p>
         </article>
         <!-- 명령어 질의 응답 처리한 부분 -->
-        <p id="title">처리된 명령어 응답 부분 입니다 ⏎</p>
+        <p class="title">처리된 명령어 응답 부분 입니다 ⏎</p>
       </div>
     </section>
 
@@ -69,17 +63,13 @@
     <!-- 인식한 명령어 영역 -->
     <section id="transcript" aria-labelledby="transcriptHeading">
       <h2 id="transcriptHeading">
-        <p id="title">인식한 명령어</p>
+        <p class="title">인식한 명령어</p>
       </h2>
-      <p id="descript" aria-live="polite">* 인식한 명령어가 없습니다 *</p>
+      <p class="descript" aria-live="polite">* 인식한 명령어가 없습니다 *</p>
     </section>
 
     <!-- 음성인식 버튼 -->
-    <button
-      id="micButton"
-      type="button"
-      aria-label="음성인식 시작하기"
-      aria-pressed="false">
+    <button id="micButton" type="button" aria-label="음성인식 시작하기" aria-pressed="false">
       음성인식 시작
     </button>
 
@@ -95,4 +85,5 @@
 
   <script src="dist/sidepanel.js" type="module"></script>
 </body>
+
 </html>

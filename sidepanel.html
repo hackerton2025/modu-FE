@@ -42,7 +42,7 @@
 
 <body>
   <header id="header" role="banner">
-    <img src="logos/modu.svg" alt="Modu 로고" />
+    <img id="logo" src="logos/modu.svg" alt="Modu 로고" />
   </header>
 
   <main id="mainWrapper" role="main">
@@ -58,7 +58,7 @@
         <p style="font-size: 20px; font-weight: 700; color: #333; margin-bottom: 16px;">Modu와 함께 웹을 탐색해보세요</p>
         <p style="font-size: 18px; color: #666; line-height: 1.8; max-width: 480px;">
           <strong>Space</strong>를 눌러 음성으로 대화를 시작하거나<br>
-          <strong>Command+Shift+L</strong>을 눌러 현재 페이지 내용을 분석해보세요
+          <strong>Option+S</strong>를 눌러 현재 페이지 내용을<br> 분석해보세요
         </p>
       </div>
 
@@ -71,7 +71,7 @@
     <div id="bottomSection">
       <!-- 현재 인식 중인 명령어 표시 -->
       <div id="transcript" aria-live="polite">
-        <p id="transcriptText"></p>
+        <p id="transcriptText" style="color: #888;">이곳에 입력될 메시지가 표시됩니다</p>
       </div>
 
       <!-- 음성인식 버튼 -->
@@ -89,7 +89,7 @@
       <h2>키보드 단축키</h2>
       <ul>
         <li>스페이스바: 음성인식 시작 또는 중지</li>
-        <li>Command+Shift+L (Mac) 또는 Ctrl+Shift+L (Windows): 현재 페이지 분석 및 음성 읽기</li>
+        <li>Option+S (Mac) 또는 Alt+S (Windows): 현재 페이지 분석 및 음성 읽기</li>
         <li>Escape: 음성 읽기 중지</li>
       </ul>
     </div>

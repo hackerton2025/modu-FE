@@ -31,8 +31,8 @@
   "commands": {
     "read-page": {
       "suggested_key": {
-        "default": "Ctrl+Shift+L",
-        "mac": "Command+Shift+L"
+        "default": "Alt+S",
+        "mac": "Alt+S"
       },
       "description": "현재 페이지 읽기"
     }

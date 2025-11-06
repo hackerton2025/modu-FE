@@ -95,10 +95,10 @@ chrome.commands.onCommand.addListener((command: string) => {
         const tabId = tabs[0].id;
         const windowId = tabs[0].windowId;
 
-        // 1. 사이드패널 열기 (사용자 제스처 컨텍스트 내에서)
+        // 사이드패널 열기 (사용자 제스처 컨텍스트 내에서)
         chrome.sidePanel.open({ windowId });
 
-        // 2. 사이드패널이 로드될 시간을 주고 HTML 캡처
+        // 사이드패널이 로드될 시간을 주고 HTML 캡처
         setTimeout(() => {
           // Content script에 HTML 캡처 요청
           chrome.tabs.sendMessage(tabId, { type: "CAPTURE_HTML" }, (response: any) => {
@@ -108,15 +108,13 @@ chrome.commands.onCommand.addListener((command: string) => {
             }
 
             if (response && response.success) {
-              // 3. 사이드패널에 데이터 전달 (약간의 지연 후)
+              // 사이드패널에 데이터 전달
               setTimeout(() => {
                 chrome.runtime.sendMessage({
                   type: 'HTML_CAPTURED',
                   summary: response.summary,
                   html: response.html
-                }).catch(() => {
-                  console.log('Sidepanel이 아직 준비되지 않았습니다.');
-                });
+                })
               }, 100);
             }
           });

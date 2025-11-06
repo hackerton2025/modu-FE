@@ -2,7 +2,6 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-
 // dist 디렉토리 정리
 if (fs.existsSync('dist')) {
   fs.rmSync('dist', { recursive: true, force: true });
@@ -16,7 +15,6 @@ execSync('npx webpack --config webpack.config.js', { stdio: 'inherit' });
 execSync('npx tsc', { stdio: 'inherit' });
 
 // public/ 디렉토리를 dist/로 복사
-console.log('  - Copying public files to dist...');
 function copyRecursiveSync(src, dest) {
   const exists = fs.existsSync(src);
   const stats = exists && fs.statSync(src);

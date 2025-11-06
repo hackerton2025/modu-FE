@@ -63,12 +63,12 @@ function cleanHTML(html: string): string {
   return doc.documentElement.outerHTML;
 }
 
-// DOM 구조를 최소한으로 요약 (토큰 제한 대응)
+// DOM 구조 요약
 function summarizePageStructure(): string {
   const summary: string[] = [];
-  const MAX_CHARS = 15000; // 최대 15,000자로 제한 (약 4,000 토큰)
+  const MAX_CHARS = 15000; // 최대 15,000자로 제한
 
-  // 1. 페이지 기본 정보
+  // 페이지 기본 정보
   summary.push(`=== 페이지 정보 ===`);
   summary.push(`제목: ${document.title || "(없음)"}`);
   
@@ -79,7 +79,7 @@ function summarizePageStructure(): string {
   }
   summary.push("");
 
-  // 2. 페이지 구조 (간단히)
+  // 페이지 구조
   const main = document.querySelector('main, [role="main"]');
   const header = document.querySelector('header, [role="banner"]');
   const nav = document.querySelector('nav, [role="navigation"]');
@@ -94,7 +94,7 @@ function summarizePageStructure(): string {
     summary.push("");
   }
 
-  // 3. 주요 제목 (최대 10개, 짧게)
+  // 주요 제목
   const headings = document.querySelectorAll("h1, h2, h3");
   if (headings.length > 0) {
     summary.push(`=== 제목 ===`);
@@ -111,7 +111,7 @@ function summarizePageStructure(): string {
     summary.push("");
   }
 
-  // 4. 인터랙티브 요소 (간결하게)
+  // 인터랙티브 요소
   summary.push(`=== 기능 ===`);
   
   // 폼
@@ -120,7 +120,7 @@ function summarizePageStructure(): string {
     summary.push(`폼 ${forms.length}개`);
   }
 
-  // 버튼 (최대 8개)
+  // 버튼
   const buttons = document.querySelectorAll('button, input[type="submit"], [role="button"]');
   if (buttons.length > 0) {
     const btnTexts: string[] = [];
@@ -137,7 +137,7 @@ function summarizePageStructure(): string {
     }
   }
 
-  // 입력 필드 (최대 8개)
+  // 입력 필드
   const inputs = document.querySelectorAll('input:not([type="hidden"]), textarea, select');
   if (inputs.length > 0) {
     const inputNames: string[] = [];
@@ -158,7 +158,7 @@ function summarizePageStructure(): string {
   }
   summary.push("");
 
-  // 5. 주요 링크 (최대 10개, 짧게)
+  // 주요 링크
   const links = document.querySelectorAll("a[href]");
   if (links.length > 0) {
     summary.push(`=== 링크 ===`);
@@ -175,7 +175,7 @@ function summarizePageStructure(): string {
     summary.push("");
   }
 
-  // 6. 핵심 텍스트 (최대 5개, 짧게)
+  // 핵심 텍스트
   const contentElements = document.querySelectorAll('p, article, [role="article"]');
   if (contentElements.length > 0) {
     summary.push(`=== 텍스트 ===`);

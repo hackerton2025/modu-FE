@@ -164,9 +164,9 @@ function initRecognition() {
     silenceTimer = setTimeout(() => {
       if (isListening) {
         recognition.stop();
-        announceToScreenReader('3초 동안 음성이 감지되지 않아 음성인식이 종료되었습니다.');
+        announceToScreenReader('5초 동안 음성이 감지되지 않아 음성인식이 종료되었습니다.');
       }
-    }, 3000);
+    }, 5000);
   };
 
   // 음성인식 시작
@@ -211,8 +211,10 @@ function initRecognition() {
     const messages = messageList.querySelectorAll('.message.user');
     if (messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
-      const command = lastMessage.textContent || '';
-      if (command) {
+      const command = (lastMessage.textContent || '').trim();
+
+      // 명령어가 비어있지 않을 때만 처리
+      if (command && command.length > 0) {
         processCommand(command);
       }
     }
@@ -284,16 +286,18 @@ function startRecognition() {
 
 // MCP 명령어 처리 함수
 async function processCommand(message: string) {
-  if (!message || message === '' || message === '여기에 인식된 텍스트가 표시됩니다...') {
+  // 빈 메시지는 처리하지 않음
+  const trimmedMessage = message.trim();
+  if (!trimmedMessage || trimmedMessage === '' || trimmedMessage === '여기에 인식된 텍스트가 표시됩니다...') {
     return;
   }
 
-  // "처리 중..." 메시지 추가
+  // "처리 중..." 메시지 추가 (TTS 안함)
   addAIMessage('처리 중입니다...');
 
   try {
     // 백엔드에 명령어 전송
-    const response = await executeCommand(message);
+    const response = await executeCommand(trimmedMessage);
 
     // 마지막 AI 메시지 업데이트 (처리 중 -> 실제 응답)
     const aiMessages = messageList.querySelectorAll('.message.ai');
@@ -301,12 +305,23 @@ async function processCommand(message: string) {
       const lastAIMessage = aiMessages[aiMessages.length - 1] as HTMLElement;
       lastAIMessage.textContent = response;
 
-      // TTS로 응답 읽어주기
       speakText(response);
     }
   } catch (error: any) {
     console.error('명령어 처리 오류:', error);
-    addAIMessage(`오류가 발생했습니다: ${error.message}`);
+    const errorMessage = `오류가 발생했습니다: ${error.message}`;
+
+    // 마지막 AI 메시지 업데이트
+    const aiMessages = messageList.querySelectorAll('.message.ai');
+    if (aiMessages.length > 0) {
+      const lastAIMessage = aiMessages[aiMessages.length - 1] as HTMLElement;
+      lastAIMessage.textContent = errorMessage;
+    } else {
+      addAIMessage(errorMessage);
+    }
+
+    // 오류도 TTS로 읽어주기
+    speakText(errorMessage);
   }
 }
 

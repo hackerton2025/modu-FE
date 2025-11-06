@@ -14,10 +14,10 @@ declare const chrome: any;
 // Web Speech API 사용을 위한 변수
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-// DOM 요소 - 새 UI 구조에 맞게 수정
+// DOM 요소
 const micButton = document.getElementById('micButton') as HTMLButtonElement;
-const transcriptDiv = document.getElementById('transcript') as HTMLDivElement;
-const listContainer = document.getElementById('listContainer') as HTMLDivElement;
+const transcriptText = document.getElementById('transcriptText') as HTMLParagraphElement;
+const messageList = document.getElementById('messageList') as HTMLDivElement;
 const statusAnnouncer = document.getElementById('statusAnnouncer') as HTMLDivElement;
 
 let recognition: any = null;
@@ -35,6 +35,47 @@ function announceToScreenReader(message: string) {
     setTimeout(() => {
       statusAnnouncer.textContent = '';
     }, 2000);
+  }
+}
+
+// 사용자 메시지 추가 함수
+function addUserMessage(text: string) {
+  if (!messageList || !text) return;
+
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'message user';
+  messageDiv.setAttribute('role', 'article');
+  messageDiv.setAttribute('aria-label', '사용자 메시지');
+  messageDiv.textContent = text;
+  messageDiv.tabIndex = -1;
+
+  messageList.appendChild(messageDiv);
+  scrollToBottom();
+}
+
+// AI 응답 메시지 추가 함수
+function addAIMessage(text: string) {
+  if (!messageList || !text) return;
+
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'message ai';
+  messageDiv.setAttribute('role', 'article');
+  messageDiv.setAttribute('aria-label', 'AI 응답');
+  messageDiv.textContent = text;
+  messageDiv.tabIndex = -1;
+
+  messageList.appendChild(messageDiv);
+
+  // 새 메시지에 포커스 (스크린 리더가 읽음)
+  messageDiv.focus();
+  scrollToBottom();
+}
+
+// 채팅 스크롤을 맨 아래로
+function scrollToBottom() {
+  const chatContainer = document.getElementById('chatContainer');
+  if (chatContainer) {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
   }
 }
 
@@ -73,15 +114,17 @@ function initRecognition() {
       }
     }
 
-    // 최종 결과 표시
-    if (finalTranscript && transcriptDiv) {
-      const descriptP = transcriptDiv.querySelector('#descript') as HTMLParagraphElement;
-      if (descriptP) {
-        if (descriptP.textContent === '* 인식한 명령어가 없습니다 *') {
-          descriptP.textContent = finalTranscript;
-        } else {
-          descriptP.textContent += finalTranscript;
-        }
+    // 인식 중인 텍스트 실시간 표시
+    if (interimTranscript && transcriptText) {
+      transcriptText.textContent = interimTranscript;
+    }
+
+    // 최종 결과 - 사용자 메시지로 추가
+    if (finalTranscript) {
+      addUserMessage(finalTranscript.trim());
+      // 인식 완료 후 텍스트 초기화
+      if (transcriptText) {
+        transcriptText.textContent = '';
       }
     }
   };
@@ -214,35 +257,20 @@ async function analyzeHTML(summary: string) {
     });
 
     if (response.success) {
-      // 분석 결과를 리스트에 추가 (answerContainer와 동일한 스타일)
-      if (listContainer) {
-        const answerDiv = document.createElement('article');
-        answerDiv.id = 'answerContainer';
-        answerDiv.setAttribute('role', 'article');
-        answerDiv.setAttribute('aria-labelledby', 'answerTitle-' + Date.now());
-        answerDiv.tabIndex = -1; // 프로그래밍 방식으로 포커스 가능
-
-        const titleId = 'answerTitle-' + Date.now();
-        answerDiv.innerHTML = `
-          <h3 id="${titleId}" class="sr-only">페이지 분석 결과</h3>
-          <p id="descript">${response.result}</p>
-        `;
-
-        listContainer.appendChild(answerDiv);
-
-        // 새 결과에 포커스 이동 (스크린 리더가 읽음)
-        answerDiv.focus();
-      }
+      // AI 응답 메시지 추가
+      addAIMessage(response.result);
 
       // 자동으로 TTS로 읽어주기
       speakText(response.result);
     } else {
       console.error('분석 실패:', response.error);
       announceToScreenReader('페이지 분석에 실패했습니다.');
+      addAIMessage('죄송합니다. 페이지 분석에 실패했습니다.');
     }
   } catch (error: any) {
     console.error('오류 발생:', error);
     announceToScreenReader('오류가 발생했습니다.');
+    addAIMessage('오류가 발생했습니다. 다시 시도해주세요.');
   }
 }
 

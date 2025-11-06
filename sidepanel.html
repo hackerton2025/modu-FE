@@ -19,16 +19,22 @@
       border-width: 0;
     }
 
-    /* 포커스 표시 강화 */
+    /* 포커스 표시 강화 - 고대비 노란색 */
     *:focus {
-      outline: 3px solid #4A90E2;
-      outline-offset: 2px;
+      outline: 4px solid #FFD700;
+      outline-offset: 4px;
     }
 
     button:focus {
-      outline: 3px solid #4A90E2;
+      outline: 4px solid #FFD700;
+      outline-offset: 4px;
+      box-shadow: 0 0 0 6px rgba(255, 215, 0, 0.3);
+    }
+
+    /* 메시지 포커스 */
+    .message:focus {
+      outline: 4px solid #FFD700;
       outline-offset: 2px;
-      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.3);
     }
   </style>
 </head>
@@ -47,41 +53,30 @@
       class="sr-only">
     </div>
 
-    <!-- 분석 결과 리스트 -->
-    <section id="listWrapper" aria-labelledby="resultsHeading">
-      <h2 id="resultsHeading" class="sr-only">페이지 분석 결과</h2>
-      <div
-        id="listContainer"
-        role="feed"
-        aria-label="분석 결과 목록">
-        <!-- 명령어 인식한 부분 -->
-        <article id="answerContainer" aria-labelledby="answerTitle">
-          <h3 id="answerTitle" class="sr-only">인식한 명령어</h3>
-          <p id="descript">* 인식한 명령어 부분 입니다.*</p>
-        </article>
-        <!-- 명령어 질의 응답 처리한 부분 -->
-        <p id="title">처리된 명령어 응답 부분 입니다 ⏎</p>
+    <!-- 채팅 메시지 컨테이너 -->
+    <section id="chatContainer" aria-labelledby="chatHeading">
+      <h2 id="chatHeading" class="sr-only">대화 내역</h2>
+      <div id="messageList" role="log" aria-live="polite" aria-relevant="additions">
+        <!-- 메시지들이 여기에 동적으로 추가됩니다 -->
       </div>
     </section>
 
-    <div id="hr" role="separator" aria-hidden="true"></div>
+    <!-- 하단 고정 영역 -->
+    <div id="bottomSection">
+      <!-- 현재 인식 중인 명령어 표시 -->
+      <div id="transcript" aria-live="polite">
+        <p id="transcriptText"></p>
+      </div>
 
-    <!-- 인식한 명령어 영역 -->
-    <section id="transcript" aria-labelledby="transcriptHeading">
-      <h2 id="transcriptHeading">
-        <p id="title">인식한 명령어</p>
-      </h2>
-      <p id="descript" aria-live="polite">* 인식한 명령어가 없습니다 *</p>
-    </section>
-
-    <!-- 음성인식 버튼 -->
-    <button
-      id="micButton"
-      type="button"
-      aria-label="음성인식 시작하기"
-      aria-pressed="false">
-      음성인식 시작
-    </button>
+      <!-- 음성인식 버튼 -->
+      <button
+        id="micButton"
+        type="button"
+        aria-label="음성인식 시작하기"
+        aria-pressed="false">
+        음성인식 시작
+      </button>
+    </div>
 
     <!-- 단축키 안내 (스크린 리더용) -->
     <div class="sr-only">

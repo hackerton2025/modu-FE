@@ -18,7 +18,7 @@ if (!apiKey) {
 module.exports = {
   mode: 'production',
   entry: {
-    background: './background.ts',
+    background: './src/background/background.ts',
   },
   output: {
     path: path.resolve(__dirname, 'dist'),

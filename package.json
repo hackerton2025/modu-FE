@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "음성 명령을 통해 손쉽게 브라우저 내에서 원하는 작업을 수행하는 서비스입니다.",
   "scripts": {
-    "build": "node build.js",
+    "build": "node scripts/build.js",
     "watch": "tsc --watch"
   },
   "devDependencies": {

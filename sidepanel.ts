@@ -24,6 +24,9 @@ const statusAnnouncer = document.getElementById('statusAnnouncer') as HTMLDivEle
 let recognition: any = null;
 let isListening: boolean = false;
 let silenceTimer: any = null;
+let lastProcessedMessageCount: number = 0;
+let currentSessionTranscript: string = ''; // 현재 음성인식 세션의 전체 transcript
+let isProcessing: boolean = false; // AI 처리 중 여부
 
 // TTS (Text-to-Speech) 관련
 const synth = window.speechSynthesis;
@@ -81,11 +84,11 @@ function addUserMessage(text: string) {
 }
 
 // AI 응답 메시지 추가 함수
-function addAIMessage(text: string) {
+function addAIMessage(text: string, isLoading: boolean = false) {
   if (!messageList || !text) return;
 
   const messageDiv = document.createElement('div');
-  messageDiv.className = 'message ai';
+  messageDiv.className = isLoading ? 'message ai loading' : 'message ai';
   messageDiv.setAttribute('role', 'article');
   messageDiv.setAttribute('aria-label', 'AI 응답');
   messageDiv.textContent = text;
@@ -93,8 +96,10 @@ function addAIMessage(text: string) {
 
   messageList.appendChild(messageDiv);
 
-  // 새 메시지에 포커스 (스크린 리더가 읽음)
-  messageDiv.focus();
+  // 로딩 메시지가 아닐 때만 포커스 (스크린 리더가 읽음)
+  if (!isLoading) {
+    messageDiv.focus();
+  }
   scrollToBottom();
 }
 
@@ -146,21 +151,17 @@ function initRecognition() {
       }
     }
 
-    // 인식 중인 텍스트 실시간 표시
-    if (interimTranscript && transcriptText) {
-      transcriptText.textContent = interimTranscript;
-    }
-
-    // 최종 결과 - 사용자 메시지로 추가
+    // 최종 결과를 세션 transcript에 누적
     if (finalTranscript) {
-      addUserMessage(finalTranscript.trim());
-      // 인식 완료 후 텍스트 초기화
-      if (transcriptText) {
-        transcriptText.textContent = '';
-      }
+      currentSessionTranscript += finalTranscript;
     }
 
-    // 3초 후 자동 종료 타이머 시작
+    // 인식 중인 텍스트 실시간 표시 (누적된 내용 + 현재 인식 중인 내용)
+    if (transcriptText) {
+      transcriptText.textContent = currentSessionTranscript + interimTranscript;
+    }
+
+    // 5초 후 자동 종료 타이머 시작
     silenceTimer = setTimeout(() => {
       if (isListening) {
         recognition.stop();
@@ -172,6 +173,7 @@ function initRecognition() {
   // 음성인식 시작
   recognition.onstart = () => {
     isListening = true;
+    currentSessionTranscript = ''; // 세션 시작 시 transcript 초기화
     if (micButton) {
       micButton.textContent = '음성인식 중지';
       micButton.setAttribute('aria-pressed', 'true');
@@ -180,13 +182,13 @@ function initRecognition() {
     }
     announceToScreenReader('음성인식이 시작되었습니다.');
 
-    // 초기 3초 타이머 시작
+    // 초기 5초 타이머 시작
     silenceTimer = setTimeout(() => {
       if (isListening) {
         recognition.stop();
-        announceToScreenReader('3초 동안 음성이 감지되지 않아 음성인식이 종료되었습니다.');
+        announceToScreenReader('5초 동안 음성이 감지되지 않아 음성인식이 종료되었습니다.');
       }
-    }, 3000);
+    }, 5000);
   };
 
   // 음성인식 종료
@@ -207,17 +209,23 @@ function initRecognition() {
     }
     announceToScreenReader('음성인식이 중지되었습니다.');
 
-    // 마지막 사용자 메시지를 가져와서 MCP 명령어 처리
-    const messages = messageList.querySelectorAll('.message.user');
-    if (messages.length > 0) {
-      const lastMessage = messages[messages.length - 1];
-      const command = (lastMessage.textContent || '').trim();
+    // 누적된 transcript를 사용자 메시지로 추가
+    const finalCommand = currentSessionTranscript.trim();
 
-      // 명령어가 비어있지 않을 때만 처리
-      if (command && command.length > 0) {
-        processCommand(command);
-      }
+    // transcript 초기화
+    if (transcriptText) {
+      transcriptText.textContent = '';
     }
+
+    // 명령어가 비어있지 않을 때만 처리
+    if (finalCommand && finalCommand.length > 0) {
+      addUserMessage(finalCommand);
+      processCommand(finalCommand);
+      lastProcessedMessageCount++;
+    }
+
+    // 세션 transcript 초기화
+    currentSessionTranscript = '';
   };
 
   // 에러 처리
@@ -266,6 +274,19 @@ function startRecognition() {
     return;
   }
 
+  // AI가 처리 중이면 음성인식 시작 불가
+  if (isProcessing) {
+    announceToScreenReader('AI가 응답을 처리하는 중입니다. 잠시만 기다려주세요.');
+    return;
+  }
+
+  // TTS가 실행 중이면 중지
+  if (isSpeaking) {
+    synth.cancel();
+    isSpeaking = false;
+    announceToScreenReader('음성 읽기가 중지되고 음성인식이 시작됩니다.');
+  }
+
   try {
     recognition.start();
   } catch (error: any) {
@@ -292,8 +313,16 @@ async function processCommand(message: string) {
     return;
   }
 
-  // "처리 중..." 메시지 추가 (TTS 안함)
-  addAIMessage('처리 중입니다...');
+  // 처리 시작
+  isProcessing = true;
+  if (micButton) {
+    micButton.disabled = true;
+    micButton.style.opacity = '0.5';
+    micButton.style.cursor = 'not-allowed';
+  }
+
+  // "처리 중..." 메시지 추가 (로딩 애니메이션 포함)
+  addAIMessage('처리 중입니다...', true);
 
   try {
     // 백엔드에 명령어 전송
@@ -303,7 +332,11 @@ async function processCommand(message: string) {
     const aiMessages = messageList.querySelectorAll('.message.ai');
     if (aiMessages.length > 0) {
       const lastAIMessage = aiMessages[aiMessages.length - 1] as HTMLElement;
+      // 로딩 클래스 제거
+      lastAIMessage.classList.remove('loading');
       lastAIMessage.textContent = response;
+      // 포커스 이동 (스크린 리더가 읽음)
+      lastAIMessage.focus();
 
       speakText(response);
     }
@@ -315,13 +348,24 @@ async function processCommand(message: string) {
     const aiMessages = messageList.querySelectorAll('.message.ai');
     if (aiMessages.length > 0) {
       const lastAIMessage = aiMessages[aiMessages.length - 1] as HTMLElement;
+      // 로딩 클래스 제거
+      lastAIMessage.classList.remove('loading');
       lastAIMessage.textContent = errorMessage;
+      lastAIMessage.focus();
     } else {
       addAIMessage(errorMessage);
     }
 
     // 오류도 TTS로 읽어주기
     speakText(errorMessage);
+  } finally {
+    // 처리 종료
+    isProcessing = false;
+    if (micButton) {
+      micButton.disabled = false;
+      micButton.style.opacity = '1';
+      micButton.style.cursor = 'pointer';
+    }
   }
 }
 
@@ -363,7 +407,18 @@ function speakText(text: string) {
 
 // HTML 분석 함수
 async function analyzeHTML(summary: string) {
+  // 처리 시작
+  isProcessing = true;
+  if (micButton) {
+    micButton.disabled = true;
+    micButton.style.opacity = '0.5';
+    micButton.style.cursor = 'not-allowed';
+  }
+
   announceToScreenReader('페이지를 분석하고 있습니다. 잠시만 기다려주세요.');
+
+  // 로딩 메시지 추가
+  addAIMessage('페이지를 분석하고 있습니다...', true);
 
   try {
     const response = await chrome.runtime.sendMessage({
@@ -372,20 +427,50 @@ async function analyzeHTML(summary: string) {
     });
 
     if (response.success) {
-      // AI 응답 메시지 추가
-      addAIMessage(response.result);
+      // 마지막 AI 메시지 업데이트 (로딩 -> 실제 응답)
+      const aiMessages = messageList.querySelectorAll('.message.ai');
+      if (aiMessages.length > 0) {
+        const lastAIMessage = aiMessages[aiMessages.length - 1] as HTMLElement;
+        lastAIMessage.classList.remove('loading');
+        lastAIMessage.textContent = response.result;
+        lastAIMessage.focus();
+      }
 
       // 자동으로 TTS로 읽어주기
       speakText(response.result);
     } else {
       console.error('분석 실패:', response.error);
       announceToScreenReader('페이지 분석에 실패했습니다.');
-      addAIMessage('죄송합니다. 페이지 분석에 실패했습니다.');
+
+      // 마지막 AI 메시지 업데이트
+      const aiMessages = messageList.querySelectorAll('.message.ai');
+      if (aiMessages.length > 0) {
+        const lastAIMessage = aiMessages[aiMessages.length - 1] as HTMLElement;
+        lastAIMessage.classList.remove('loading');
+        lastAIMessage.textContent = '죄송합니다. 페이지 분석에 실패했습니다.';
+        lastAIMessage.focus();
+      }
     }
   } catch (error: any) {
     console.error('오류 발생:', error);
     announceToScreenReader('오류가 발생했습니다.');
-    addAIMessage('오류가 발생했습니다. 다시 시도해주세요.');
+
+    // 마지막 AI 메시지 업데이트
+    const aiMessages = messageList.querySelectorAll('.message.ai');
+    if (aiMessages.length > 0) {
+      const lastAIMessage = aiMessages[aiMessages.length - 1] as HTMLElement;
+      lastAIMessage.classList.remove('loading');
+      lastAIMessage.textContent = '오류가 발생했습니다. 다시 시도해주세요.';
+      lastAIMessage.focus();
+    }
+  } finally {
+    // 처리 종료
+    isProcessing = false;
+    if (micButton) {
+      micButton.disabled = false;
+      micButton.style.opacity = '1';
+      micButton.style.cursor = 'pointer';
+    }
   }
 }
 

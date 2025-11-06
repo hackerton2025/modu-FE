@@ -229,6 +229,46 @@ function speakText() {
   synth.speak(utterance);
 }
 
+// TTS - 특정 텍스트를 읽어주는 함수 (AI 분석 결과용)
+function speakTextContent(text: string) {
+  if (!text) {
+    return;
+  }
+
+  // 이미 읽고 있으면 중지
+  if (isSpeaking) {
+    synth.cancel();
+    isSpeaking = false;
+  }
+
+  // 새로운 발화 생성
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'ko-KR'; // 한국어
+  utterance.rate = 1.0; // 속도 (0.1 ~ 10)
+  utterance.pitch = 1.0; // 음높이 (0 ~ 2)
+  utterance.volume = 1.0; // 볼륨 (0 ~ 1)
+
+  // 이벤트 핸들러
+  utterance.onstart = () => {
+    isSpeaking = true;
+    statusDiv.textContent = '페이지 내용을 읽고 있습니다...';
+  };
+
+  utterance.onend = () => {
+    isSpeaking = false;
+    statusDiv.textContent = '페이지 내용 읽기가 완료되었습니다.';
+  };
+
+  utterance.onerror = (event: any) => {
+    isSpeaking = false;
+    errorDiv.textContent = `음성 출력 오류: ${event.error}`;
+    statusDiv.textContent = '';
+  };
+
+  // 음성 출력 시작
+  synth.speak(utterance);
+}
+
 // 마이크 버튼 클릭 이벤트
 micButton.addEventListener('click', () => {
   if (isListening) {
@@ -241,22 +281,25 @@ micButton.addEventListener('click', () => {
 // 텍스트 읽기 버튼 클릭 이벤트
 speakButton.addEventListener('click', speakText);
 
-// HTML 분석 함수
-async function analyzeHTML(html: string) {
+// HTML 분석 함수 - summary를 사용
+async function analyzeHTML(summary: string) {
   // 로딩 상태 표시
   analysisResultDiv.className = 'loading';
   analysisResultDiv.textContent = 'AI가 페이지를 분석하는 중입니다... (최대 10초 소요)';
 
   try {
-    // Background에 분석 요청
+    // Background에 분석 요청 (summary 전송)
     const response = await chrome.runtime.sendMessage({
       type: 'ANALYZE_HTML',
-      html: html
+      html: summary  // 요약된 구조만 전송
     });
 
     if (response.success) {
       analysisResultDiv.className = '';
       analysisResultDiv.textContent = response.result;
+
+      // AI 분석 결과를 자동으로 TTS로 읽어주기
+      speakTextContent(response.result);
     } else {
       analysisResultDiv.className = 'error';
       analysisResultDiv.textContent = `분석 실패: ${response.error || '알 수 없는 오류'}`;
@@ -267,14 +310,14 @@ async function analyzeHTML(html: string) {
   }
 }
 
-// HTML 코드 표시 함수
-async function displayHTML(html: string) {
-  // HTML을 보기 좋게 포맷팅
+// 데이터 표시 함수 - summary와 html 둘 다 받음
+async function displayData(summary: string, html: string) {
+  // HTML을 보기 좋게 포맷팅 (UI 표시용)
   const formatted = formatHTML(html);
   htmlCodeDiv.textContent = formatted;
 
-  // HTML 분석 시작
-  await analyzeHTML(html);
+  // AI 분석 시작 (summary 사용)
+  await analyzeHTML(summary);
 }
 
 // HTML 포맷팅 함수 (간단한 들여쓰기)
@@ -286,14 +329,15 @@ function formatHTML(html: string): string {
   return html;
 }
 
-// Content Script로부터 HTML 받기 (단축키 눌렀을 때)
+// Content Script로부터 데이터 받기 (단축키 눌렀을 때)
 chrome.runtime.onMessage.addListener((request: any) => {
   if (request.type === 'HTML_CAPTURED') {
-    displayHTML(request.html);
+    // summary와 html 둘 다 받음
+    displayData(request.summary, request.html);
   }
 });
 
-// 현재 탭의 HTML 가져오기
+// 현재 탭의 데이터 가져오기
 async function getCurrentTabHTML() {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -303,15 +347,15 @@ async function getCurrentTabHTML() {
       return;
     }
 
-    // Content Script에 HTML 요청
+    // Content Script에 데이터 요청
     chrome.tabs.sendMessage(tab.id, { type: 'GET_HTML' }, (response: any) => {
       if (chrome.runtime.lastError) {
         htmlCodeDiv.textContent = '페이지 로드 중이거나 접근할 수 없는 페이지입니다.\n확장 프로그램을 다시 로드하거나 페이지를 새로고침해주세요.';
         return;
       }
 
-      if (response && response.html) {
-        displayHTML(response.html);
+      if (response && response.summary && response.html) {
+        displayData(response.summary, response.html);
       }
     });
   } catch (error) {

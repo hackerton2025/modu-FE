@@ -22,6 +22,7 @@ const statusAnnouncer = document.getElementById('statusAnnouncer') as HTMLDivEle
 
 let recognition: any = null;
 let isListening: boolean = false;
+let silenceTimer: any = null;
 
 // TTS (Text-to-Speech) 관련
 const synth = window.speechSynthesis;
@@ -96,6 +97,11 @@ function initRecognition() {
 
   // 음성인식 결과 처리
   recognition.onresult = (event: any) => {
+    // 기존 타이머 초기화 (말을 하면 타이머 리셋)
+    if (silenceTimer) {
+      clearTimeout(silenceTimer);
+    }
+
     let interimTranscript = '';
     let finalTranscript = '';
 
@@ -127,6 +133,14 @@ function initRecognition() {
         transcriptText.textContent = '';
       }
     }
+
+    // 3초 후 자동 종료 타이머 시작
+    silenceTimer = setTimeout(() => {
+      if (isListening) {
+        recognition.stop();
+        announceToScreenReader('3초 동안 음성이 감지되지 않아 음성인식이 종료되었습니다.');
+      }
+    }, 3000);
   };
 
   // 음성인식 시작
@@ -139,11 +153,26 @@ function initRecognition() {
       micButton.classList.add('listening');
     }
     announceToScreenReader('음성인식이 시작되었습니다.');
+
+    // 초기 3초 타이머 시작
+    silenceTimer = setTimeout(() => {
+      if (isListening) {
+        recognition.stop();
+        announceToScreenReader('3초 동안 음성이 감지되지 않아 음성인식이 종료되었습니다.');
+      }
+    }, 3000);
   };
 
   // 음성인식 종료
   recognition.onend = () => {
     isListening = false;
+
+    // 타이머 정리
+    if (silenceTimer) {
+      clearTimeout(silenceTimer);
+      silenceTimer = null;
+    }
+
     if (micButton) {
       micButton.textContent = '음성인식 시작';
       micButton.setAttribute('aria-pressed', 'false');
@@ -157,6 +186,13 @@ function initRecognition() {
   recognition.onerror = (event: any) => {
     console.error('음성인식 오류:', event.error);
     isListening = false;
+
+    // 타이머 정리
+    if (silenceTimer) {
+      clearTimeout(silenceTimer);
+      silenceTimer = null;
+    }
+
     if (micButton) {
       micButton.textContent = '음성인식 시작';
       micButton.setAttribute('aria-pressed', 'false');
@@ -293,12 +329,29 @@ if (micButton) {
   });
 }
 
-// 키보드 단축키: Escape로 음성 중지
+// 키보드 단축키
 document.addEventListener('keydown', (event: KeyboardEvent) => {
+  // Escape: 음성 중지
   if (event.key === 'Escape' && isSpeaking) {
     synth.cancel();
     isSpeaking = false;
     announceToScreenReader('음성 읽기가 중지되었습니다.');
+  }
+
+  // 스페이스바: 음성인식 시작/중지
+  if (event.code === 'Space') {
+    // input이나 textarea에서는 작동하지 않도록
+    const target = event.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      return;
+    }
+
+    event.preventDefault();
+    if (isListening) {
+      recognition.stop();
+    } else {
+      startRecognition();
+    }
   }
 });
 

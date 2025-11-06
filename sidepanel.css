@@ -20,7 +20,7 @@ body {
   left: 0;
   right: 0;
   padding: 20px 24px;
-  border-bottom: 2px solid #333333;
+  border-bottom: 2px solid #d9d9d9;
   background-color: #ffffff;
 }
 
@@ -164,7 +164,7 @@ body {
 #bottomSection {
   padding: 20px 24px 24px;
   background-color: #FFFFFF;
-  border-top: 3px solid #000000;
+  border-top: 3px solid #d9d9d9;
 }
 
 /* 현재 인식 중인 텍스트 */
@@ -173,7 +173,7 @@ body {
   margin-bottom: 16px;
   padding: 14px 18px;
   background-color: #F0F0F0;
-  border: 2px solid #666666;
+  border: 2px solid #878787ff;
   border-radius: 8px;
   font-size: 18px;
   color: #000000;

@@ -134,9 +134,6 @@ modu-FE/
 ```bash
 # 빌드
 npm run build
-
-# TypeScript watch 모드 (개발 중)
-npm run watch
 ```
 
 <br />
@@ -149,24 +146,8 @@ npm run watch
 
 ## 👥 팀
 
-**팀명**: Iveryone
-**팀원**: 허온, 이세민, 이현규, 박세빈
+**팀명**: Iveryone<br />
+**팀원**: 허온, 이세민, 이현규, 박세빈<br />
 **프로젝트**: Modu - 시각장애인 웹 접근성 도우미
 
 <br />
-
-## 🤝 기여하기
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-<br />
-
----
-
-<div align="center">
-  <strong>Made with ❤️ for accessibility</strong>
-</div>
